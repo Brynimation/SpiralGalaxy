@@ -17,7 +17,7 @@ public class Orbit : MonoBehaviour
 
     [Range(0, 10)] //max of 10 bodies per orbit
     [SerializeField] int numBodies;
-    [SerializeField] float orbitalPeriod; //
+    [SerializeField] float orbitalPeriod; 
     Stack<OrbittingBody> bodies;
 
     [Header("Ellipse Properties")]
@@ -31,6 +31,8 @@ public class Orbit : MonoBehaviour
     public float inclination;
     [Range(0, 360)]
     public float longitudeOfAscendingNode;
+    [Range(0, 360)]
+    public float angularOffset;
 
     [Header("Line Properties")]
     public Material material;
@@ -47,6 +49,7 @@ public class Orbit : MonoBehaviour
         eccentricity = orbit.eccentricity;
         inclination = orbit.inclination;
         longitudeOfAscendingNode = orbit.longitudeOfAscendingNode;
+        angularOffset = orbit.angularOffset;
         this.displayEllipse = displayEllipse;
         this.lineThickness = lineThickness;
         this.orbitalPeriod = orbit.orbitalPeriod;
@@ -61,7 +64,7 @@ public class Orbit : MonoBehaviour
 
     public void InitialiseBodies() 
     {
-        orbitProperties = new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, orbitalPeriod);
+        orbitProperties = new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, angularOffset, orbitalPeriod);
 
         if (bodies == null || bodies.Count == 0)
         {
@@ -162,7 +165,7 @@ public class Orbit : MonoBehaviour
             float curAngleDeg = i * angleStep;
             float curAngle = curAngleDeg * Mathf.Deg2Rad; //+ orbit.AngleOffsetRadians;
             Vector3 point = new Vector3(orbitProperties.semiMajorAxis * Mathf.Sin(curAngle), orbitProperties.SemiMinorAxis * Mathf.Cos(curAngle)) + transform.position;
-            pointsOnEllipse[i] = orbitProperties.getRotatedPoint(point, Quaternion.Euler(orbitProperties.Inclination, orbitProperties.LongitudeOfAscendingNode, 0f));
+            pointsOnEllipse[i] = orbitProperties.getRotatedPoint(point, Quaternion.Euler(orbitProperties.Inclination, orbitProperties.LongitudeOfAscendingNode, orbitProperties.angularOffset));
         }
 
         //Before calling SetPositions we must access positionCount

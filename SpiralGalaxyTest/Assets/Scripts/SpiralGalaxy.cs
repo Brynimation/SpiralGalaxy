@@ -14,10 +14,19 @@ public class SpiralGalaxy : MonoBehaviour
     [SerializeField] float maxAngleOfInclination;
     [Range(0, 360)]
     [SerializeField] float maxLongitudeOfAscendingNode;
+    [Range(0, 720)]
+    [SerializeField] float maxAngularOffset;
+    [Range(0, 1)]
+    [SerializeField] float minEccentricity;
+    [Range(0, 1)]
+    [SerializeField] float maxEccentricity;
 
     [Header("Galaxy Radius")]
+    [SerializeField] float galaxyHaloSize;
     [Range(1, 10000)]
     [SerializeField] float galaxyRadius;
+    [Range(1, 1000)]
+    [SerializeField] float galacticCoreRadius;
     [SerializeField] Orbit orbitPrefab;
 
     const float MINIMUM_ORBIT_SIZE = 1;
@@ -28,32 +37,47 @@ public class SpiralGalaxy : MonoBehaviour
     [SerializeField] Material material;
     [SerializeField] float lineThickness;
 
+    private float quadraticEaseIn(float percent) 
+    {
+        if (percent <= 0.5f) return 2 * percent * percent;
+        percent -= 0.5f;
+        return 2.0f * percent * (1.0f - percent) + 0.5f;
+    }
+
+
+    /*Eccentricity is determined by the radius of the current orbit.*/
+    private float getEccentricity(float semiMajorAxis) 
+    {
+        //ratio of semiMajorAxis/galaxyCore gives the lerpPercent.
+
+        if (semiMajorAxis >= MINIMUM_ORBIT_SIZE && semiMajorAxis < galacticCoreRadius)
+        {
+            return Mathf.Lerp(0, minEccentricity, quadraticEaseIn(semiMajorAxis / galacticCoreRadius));
+        }
+        else if (semiMajorAxis >= galacticCoreRadius && semiMajorAxis < galaxyRadius) 
+        {
+            return Mathf.Lerp(minEccentricity, maxEccentricity, quadraticEaseIn((semiMajorAxis - galacticCoreRadius)/galaxyRadius) );
+        }
+        return Mathf.Lerp(maxEccentricity, 0, quadraticEaseIn((semiMajorAxis - galaxyRadius)/(galaxyHaloSize)));
+    }
+
     private DimensionsEllipse GenerateOrbitProperties(int orbitNum) 
     {
         float percent = orbitNum / (numOrbits + 0.0f);
-        float semiMajorAxis = Mathf.Lerp(MINIMUM_ORBIT_SIZE, galaxyRadius, percent);
+        float semiMajorAxis = Mathf.Lerp(MINIMUM_ORBIT_SIZE, galaxyHaloSize, percent);
         float angleOfInclination = Mathf.Lerp(0, maxAngleOfInclination, percent);
         float longitudeOfAscendingNode = Mathf.Lerp(0, maxLongitudeOfAscendingNode, percent);
-        float eccentricity = Mathf.Lerp(0, 1, percent);
+        float angularOffset = Mathf.Lerp(0, maxAngularOffset, percent);
+        float eccentricity = getEccentricity(semiMajorAxis);
         float orbitalPeriod = Mathf.Lerp(minMaxOrbitalPeriod.x, minMaxOrbitalPeriod.y, Mathf.Pow(semiMajorAxis, 1.5f)/Mathf.Pow(galaxyRadius, 1.5f));
-        return new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, angleOfInclination, longitudeOfAscendingNode, orbitalPeriod);
+        return new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, angleOfInclination, longitudeOfAscendingNode, angularOffset, orbitalPeriod);
     }
-    private void ChangeOrbitSizes() 
-    {
-        //if just the size of the galaxy has been updated
-        for (int i = 0; i < numOrbits; i++)
-        {
-            Debug.Log(i);
-            orbits[i].semiMajorAxis = Mathf.Lerp(MINIMUM_ORBIT_SIZE, galaxyRadius, (i / (numOrbits + 0.0f)));
-            orbits[i].DrawEllipse();
-        }
-    }
-
     public void InitialiseOrbits() 
     {
         //Initialise our orbits, if none exist
         if (orbits == null || orbits.Count == 0)
         {
+            galaxyHaloSize = galaxyRadius * 2;
             orbits = new List<Orbit>();
             for (int i = 0; i < numOrbits; i++)
             {

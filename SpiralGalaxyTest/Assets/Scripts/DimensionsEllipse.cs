@@ -15,6 +15,7 @@ public class DimensionsEllipse
     private float semiMinorAxis;
     public float inclination;
     public float longitudeOfAscendingNode;
+    public float angularOffset;
     public float orbitalPeriod;
     public Quaternion rotation;
 
@@ -32,15 +33,16 @@ public class DimensionsEllipse
     }
 
 
-    public DimensionsEllipse(Vector3 centre, float semiMajorAxis, float eccentricity, float inclination, float longitudeOfAscendingNode, float orbitalPeriod)
+    public DimensionsEllipse(Vector3 centre, float semiMajorAxis, float eccentricity, float inclination, float longitudeOfAscendingNode, float angularOffset, float orbitalPeriod)
     {
         this.centre = centre;
         this.SemiMajorAxis = semiMajorAxis;
         this.Eccentricity = eccentricity;
         this.inclination = inclination;
         this.longitudeOfAscendingNode = longitudeOfAscendingNode;
+        this.angularOffset = angularOffset;
         this.orbitalPeriod = orbitalPeriod; 
-        this.rotation = Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, 0f));
+        this.rotation = Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, angularOffset));
     }
 
     public float SemiMajorAxis {
@@ -68,7 +70,7 @@ public class DimensionsEllipse
         percentageAroundEllipse = Mathf.Clamp01(percentageAroundEllipse);
         float angle = percentageAroundEllipse * 360 * Mathf.Deg2Rad;
         Vector3 point = new Vector3(semiMajorAxis * Mathf.Sin(angle), semiMinorAxis * Mathf.Cos(angle)) + centre;
-        Vector3 orientedPoint = getRotatedPoint(point, Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, 0f)));
+        Vector3 orientedPoint = getRotatedPoint(point, Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, angularOffset)));
         return orientedPoint;
     }
 }

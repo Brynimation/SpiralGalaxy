@@ -152,12 +152,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 747f3a0d5aadf9f43a1f9e69d7493c25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numOrbits: 29
+  numOrbits: 34
   numBodiesPerOrbit: 6
   minMaxOrbitalPeriod: {x: 2, y: 1002}
   maxAngleOfInclination: 0
   maxLongitudeOfAscendingNode: 0
-  galaxyRadius: 200
+  maxAngularOffset: 0
+  minEccentricity: 0.517
+  maxEccentricity: 0.939
+  galaxyHaloSize: 0
+  galaxyRadius: 108
+  galacticCoreRadius: 0
   orbitPrefab: {fileID: 6832913725763153140, guid: 4c0f58d0afb5d7a47b929fedc750892d, type: 3}
   displayOrbits: 1
   material: {fileID: 2100000, guid: 91c42285f8730744cbe31a2271061dad, type: 2}
