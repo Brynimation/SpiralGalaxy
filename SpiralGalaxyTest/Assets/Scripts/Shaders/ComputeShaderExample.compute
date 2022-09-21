@@ -1,0 +1,28 @@
+// Each #kernel tells which function to compile; you can have many kernels.
+// This allows these functions to be called from c#
+// All kernels must be defined at the top to allow them to be dispatched from our c# code.
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+//Unity automatically generates a 2D Texture for us as our RenderTexture's target. RW - Read/Write
+RWTexture2D<float4> Result;
+
+/*Remember, compute shaders work by running code in parallel on the GPU.
+  The numThreads attribute specifies the dimensions of the thread groups used by our compute shader. This attribute
+  essentially defines how the processing should be spread across these different thread groups.
+  By default, we get a group of 64 threads in an 8 x 8 size.*/
+[numthreads(8,8,1)]
+
+//This function will be run when we dispatch this shader from c#
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    //id : SV_DispatchThreadID - Defines what thread and thread group a compute shader is executing in.
+    // 
+
+    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    //Assigns a colour to our render texture based on the current thread index of each group (?)
+}
+
+/*Unlike vertex, fragment and vertex shaders, compute shaders do not have a specific target ( like a mesh).
+We therefore need to tell them how, when and what to run.*/
