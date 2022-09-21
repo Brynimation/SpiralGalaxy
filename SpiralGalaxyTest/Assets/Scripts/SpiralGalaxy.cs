@@ -61,6 +61,7 @@ public class SpiralGalaxy : MonoBehaviour
     [Range(1, 1000)]
     [SerializeField] float galacticCoreRadius;
     [SerializeField] Orbit orbitPrefab;
+    float halfLightRadius;
 
     const float MINIMUM_ORBIT_SIZE = 1;
     List<Orbit> orbits;
@@ -114,9 +115,14 @@ public class SpiralGalaxy : MonoBehaviour
         return new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, angleOfInclination, longitudeOfAscendingNode, angularOffset, orbitalPeriod);
     }
 
-    private DimensionsEllipse GenerateOrbitProperties2() 
+    private DimensionsEllipse GenerateOrbitProperties2(int orbitNum) 
     {
-        float random = Random.Range(MINIMUM_ORBIT_SIZE, galaxyHaloSize);
+        //To ensure that the majority of our stars are distributed in the centre, we will
+        //use the half light radius of our galaxy. We will only instantiate orbits outside of this
+        //radius if we've already created half the total orbits.
+        float minOrbitSize = (orbitNum > numOrbits / 2) ? MINIMUM_ORBIT_SIZE : halfLightRadius;
+        float maxOrbitSize = (orbitNum > numOrbits / 2) ? galaxyHaloSize : halfLightRadius;
+        float random = Random.Range(minOrbitSize, maxOrbitSize);
         float semiMajorAxis = BodyDistributor.GenerateOrbitRadius(random);
         float percent = random / (float)semiMajorAxis;
         float angleOfInclination = Mathf.Lerp(0, maxAngleOfInclination, percent);
@@ -134,11 +140,12 @@ public class SpiralGalaxy : MonoBehaviour
         if (orbits == null || orbits.Count == 0)
         {
             galaxyHaloSize = galaxyRadius * 2;
+            halfLightRadius = galacticCoreRadius;
             orbits = new List<Orbit>();
             for (int i = 0; i < numOrbits; i++)
             {
                 Orbit curOrbit = Instantiate(orbitPrefab, transform.position, Quaternion.identity) as Orbit;
-                curOrbit.SetOrbitProperties(numBodiesPerOrbit, GenerateOrbitProperties2(), displayOrbits, lineThickness);
+                curOrbit.SetOrbitProperties(numBodiesPerOrbit, GenerateOrbitProperties2(i), displayOrbits, lineThickness);
                 curOrbit.DrawEllipse();
                 orbits.Add(curOrbit);
                 curOrbit.transform.SetParent(transform);

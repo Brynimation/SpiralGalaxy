@@ -63,12 +63,6 @@ public class BodyDistributor
         this.scaleLength = Mathf.Exp(1);
         this.galaxyHaloSize = galaxyDiskRadius * 2;
 
-/*        float orbitIncrementSize = (galacticCoreRadius - minOrbitSize) / numDataPoints;
-        orbitValues = new float[numDataPoints];
-        for (int i = 0; i < numDataPoints; i++) 
-        {
-            orbitValues[i] = GenerateOrbitRadius(i * orbitIncrementSize);
-        } */
     }
 
     public float GenerateOrbitRadius(float val)
