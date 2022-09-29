@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-/*[CustomEditor(typeof(SpiralGalaxy))]
+[CustomEditor(typeof(SpiralGalaxy))]
 public class SpiralGalaxyEditor : Editor
 {
     public override void OnInspectorGUI()
@@ -17,4 +17,4 @@ public class SpiralGalaxyEditor : Editor
             galaxy.InitialiseOrbits();
         }
     }
-}*/
+}

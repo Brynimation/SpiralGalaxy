@@ -1,8 +1,7 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
-
-
-struct DimensionsEllipse
+const int THREAD_GROUP_SIZE = 1024;
+struct OrbitalProperties
 {
     float3 centre;
     float semiMajorAxis;
@@ -12,42 +11,49 @@ struct DimensionsEllipse
     float longitudeOfAscendingNode;
     float angularOffset;
     float orbitalPeriod;
-    Quaternion rotation;
+    //Quaternion rotation;
 };
 
 
-struct OrbittingBodyGPU
+struct OrbittingBody
 {
-    DimensionsEllipse orbitalProperties;
+    OrbitalProperties orbitalProperties;
     float3 position; 
-    public float currentPercentage;
-    private float currentTime;
+    float currentPercentage;
+    float orbitStartTime;
+    float timePassedSinceOrbitStart;
 };
 
 //positions of our orbit (okay, we maay need an array of dimensionEllipses I'll be honest)
-RWStructuredBuffer<OrbittingBodyGPU> _OrbittingBodies;
+RWStructuredBuffer<OrbittingBody> _OrbittingBodies;
 
 //current time (used to calculate the percentage a point is about its orbit)
-float _Time;
+float _DeltaTime;
 
+//Calculated positions of our orbittingBodies
+RWStructuredBuffer<float3> _Positions;
 
-float3 getRotatedPoint(float3 point, Quaternion rot)
+float3 EvaluatePositionOnEllipse(float deltaTime, OrbittingBody b)
 {
-    Vector3 dir = point - centre;
-    dir = rot * dir;
-    return centre + dir;
-}
-float3 EvaluatePositionOnEllipse(float percentageAroundEllipse)
-{
-    percentageAroundEllipse = Mathf.Clamp01(percentageAroundEllipse);
-    float angle = percentageAroundEllipse * 360 * Mathf.Deg2Rad;
-    Vector3 point = new Vector3(semiMajorAxis * Mathf.Sin(angle), semiMinorAxis * Mathf.Cos(angle)) + centre;
-    Vector3 orientedPoint = getRotatedPoint(point, Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, angularOffset)));
-    return orientedPoint;
-}
+    if(b.timePassedSinceOrbitStart > b.orbitalProperties.orbitalPeriod)
+    {
+        b.timePassedSinceOrbitStart -=b.orbitalProperties.orbitalPeriod;
+    }
+    b.timePassedSinceOrbitStart += deltaTime;
+    float3 percentageAroundEllipse = b.timePassedSinceOrbitStart / b.orbitalProperties.orbitalPeriod;
+    percentageAroundEllipse = clamp(percentageAroundEllipse, 0.0, 1.0);
+    float angle = radians(percentageAroundEllipse * 360);
+    float3 position = float3(b.orbitalProperties.semiMajorAxis * sin(angle), b.orbitalProperties.semiMinorAxis * cos(angle), 0.0) + b.orbitalProperties.centre;
+    //Vector3 orientedPoint = getRotatedPoint(point, Quaternion.Euler(new Vector3(inclination, longituqdeOfAscendingNode, angularOffset)));
+    b.position = position;
+    return position;
+};
 
-[numthreads(8,8,1)]
+
+
+[numthreads(1024,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float3 pos = SineWave3D(uv.x, uv.y, _Time);    
+  _Positions[id.x] = EvaluatePositionOnEllipse(_DeltaTime, _OrbittingBodies[id.x]);
 }
+
