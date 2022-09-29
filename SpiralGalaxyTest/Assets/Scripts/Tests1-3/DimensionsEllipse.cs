@@ -59,6 +59,8 @@ public class DimensionsEllipse
             this.semiMinorAxis = Mathf.Sqrt(semiMajorAxis * semiMajorAxis * (1 - eccentricity * eccentricity));
         }
     }
+
+    //How current position of body in a given orbit is calculated.
     public Vector3 getRotatedPoint(Vector3 point, Quaternion rot)
     {
         Vector3 dir = point - centre;

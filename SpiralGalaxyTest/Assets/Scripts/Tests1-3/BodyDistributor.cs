@@ -67,6 +67,7 @@ public class BodyDistributor
 
     public float GenerateOrbitRadius(float val)
     {
+        Debug.Log(val + " " + GetDistanceFromCentre(val));
         return GetDistanceFromCentre(val);
     }
 

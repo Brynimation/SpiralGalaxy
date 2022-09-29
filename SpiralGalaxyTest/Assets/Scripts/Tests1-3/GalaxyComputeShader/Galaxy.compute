@@ -1,0 +1,53 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+
+struct DimensionsEllipse
+{
+    float3 centre;
+    float semiMajorAxis;
+    float eccentricity;
+    float semiMinorAxis;
+    float inclination;
+    float longitudeOfAscendingNode;
+    float angularOffset;
+    float orbitalPeriod;
+    Quaternion rotation;
+};
+
+
+struct OrbittingBodyGPU
+{
+    DimensionsEllipse orbitalProperties;
+    float3 position; 
+    public float currentPercentage;
+    private float currentTime;
+};
+
+//positions of our orbit (okay, we maay need an array of dimensionEllipses I'll be honest)
+RWStructuredBuffer<OrbittingBodyGPU> _OrbittingBodies;
+
+//current time (used to calculate the percentage a point is about its orbit)
+float _Time;
+
+
+float3 getRotatedPoint(float3 point, Quaternion rot)
+{
+    Vector3 dir = point - centre;
+    dir = rot * dir;
+    return centre + dir;
+}
+float3 EvaluatePositionOnEllipse(float percentageAroundEllipse)
+{
+    percentageAroundEllipse = Mathf.Clamp01(percentageAroundEllipse);
+    float angle = percentageAroundEllipse * 360 * Mathf.Deg2Rad;
+    Vector3 point = new Vector3(semiMajorAxis * Mathf.Sin(angle), semiMinorAxis * Mathf.Cos(angle)) + centre;
+    Vector3 orientedPoint = getRotatedPoint(point, Quaternion.Euler(new Vector3(inclination, longitudeOfAscendingNode, angularOffset)));
+    return orientedPoint;
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 pos = SineWave3D(uv.x, uv.y, _Time);    
+}

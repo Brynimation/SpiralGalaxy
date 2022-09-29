@@ -50,6 +50,7 @@ public class OrbittingBody : MonoBehaviour
         if (currentTime > orbitalPeriod) currentTime = 0f;
         currentTime += Time.deltaTime;
         float percent = currentTime / orbitalPeriod;
+        //We want to go from setting a gameObject's position -> storing a position on the 
         transform.position = orbitalProperties.EvaluatePositionOnEllipse(percent);
     }
 }

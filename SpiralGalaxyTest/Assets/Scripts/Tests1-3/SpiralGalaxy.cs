@@ -63,7 +63,7 @@ public class SpiralGalaxy : MonoBehaviour
     [SerializeField] Orbit orbitPrefab;
     float halfLightRadius;
 
-    const float MINIMUM_ORBIT_SIZE = 1;
+    const float MINIMUM_ORBIT_SIZE = 0.01f;
     List<Orbit> orbits;
 
     [Header("Line Properties")]
@@ -79,13 +79,6 @@ public class SpiralGalaxy : MonoBehaviour
         percent -= 0.5f;
         return 2.0f * percent * (1.0f - percent) + 0.5f;
     }
-
-    private float exponentialEaseOut(float percent) 
-    {
-        return percent == 0 ? 0 : Mathf.Exp(percent);
-    }
-
-
     /*Eccentricity is determined by the radius of the current orbit.*/
     private float getEccentricity(float semiMajorAxis) 
     {
@@ -132,6 +125,16 @@ public class SpiralGalaxy : MonoBehaviour
         float orbitalPeriod = Mathf.Lerp(minMaxOrbitalPeriod.x, minMaxOrbitalPeriod.y, Mathf.Pow(semiMajorAxis, 1.5f) / Mathf.Pow(galaxyRadius, 1.5f));
         return new DimensionsEllipse(transform.position, semiMajorAxis, eccentricity, angleOfInclination, longitudeOfAscendingNode, angularOffset, orbitalPeriod);
     }
+
+
+    private void Update()
+    {
+        
+    }
+    private void Updatea()
+    {
+        InitialiseOrbits();
+    }
     public void InitialiseOrbits() 
     {
         //Initialise our orbits, if none exist
@@ -145,7 +148,7 @@ public class SpiralGalaxy : MonoBehaviour
             for (int i = 0; i < numOrbits; i++)
             {
                 Orbit curOrbit = Instantiate(orbitPrefab, transform.position, Quaternion.identity) as Orbit;
-                curOrbit.SetOrbitProperties(numBodiesPerOrbit, GenerateOrbitProperties2(i), displayOrbits, lineThickness);
+                curOrbit.SetOrbitProperties(numBodiesPerOrbit, GenerateOrbitProperties(i), displayOrbits, lineThickness);
                 curOrbit.DrawEllipse();
                 orbits.Add(curOrbit);
                 curOrbit.transform.SetParent(transform);

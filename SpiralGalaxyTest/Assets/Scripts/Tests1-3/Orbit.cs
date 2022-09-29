@@ -154,6 +154,7 @@ public class Orbit : MonoBehaviour
         lr.startWidth = lineThickness;
         lr.endWidth = lineThickness;
         
+        //Get an array of points
         pointsOnEllipse = new Vector3[resolution + 1];
 
         
